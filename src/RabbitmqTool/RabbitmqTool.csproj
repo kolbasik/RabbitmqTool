@@ -59,6 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CLI.cs" />
+    <Compile Include="CLIOptions.cs" />
     <Compile Include="DiffR.cs" />
     <Compile Include="MasstransitSchema.cs" />
     <Compile Include="Program.cs" />

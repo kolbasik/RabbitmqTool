@@ -36,71 +36,92 @@ namespace RabbitmqTool
         private void RestoreVHosts(IManagementClient client)
         {
             foreach (var vhost in VHosts.Where(x => !string.IsNullOrWhiteSpace(x.Name)))
+            {
                 try
                 {
-                    var aliveVHost = client.GetVhost(vhost.Name);
-                    if (aliveVHost != null)
+                    try
                     {
-                        Log.Debug($"{vhost.GetTitle()} vhost is alive.");
-                        continue;
+                        var aliveVHost = client.GetVhost(vhost.Name);
+                        if (aliveVHost != null)
+                        {
+                            Log.Debug($"{vhost.GetTitle()} vhost is alive.");
+                        }
                     }
-                    client.CreateVirtualHost(vhost.Name);
-                    Log.Info($"{vhost.GetTitle()} vhost is created.");
+                    catch (UnexpectedHttpStatusCodeException)
+                    {
+                        client.CreateVirtualHost(vhost.Name);
+                        Log.Info($"{vhost.GetTitle()} vhost is created.");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Could not handle the {vhost.GetTitle()} vhost: {ex.Message}", ex);
                 }
+            }
         }
 
         private void RestoreExchanges(IManagementClient client)
         {
             foreach (var exchange in Exchanges.Where(x => !string.IsNullOrWhiteSpace(x.Name)))
+            {
                 try
                 {
                     var vhost = new Vhost { Name = exchange.Vhost };
-                    var aliveExchange = client.GetExchange(exchange.Name, vhost);
-                    if (aliveExchange != null)
+                    try
                     {
-                        Log.Debug($"{exchange.GetTitle()} exchange is alive.");
-                        continue;
+                        var aliveExchange = client.GetExchange(exchange.Name, vhost);
+                        if (aliveExchange != null)
+                        {
+                            Log.Debug($"{exchange.GetTitle()} exchange is alive.");
+                        }
                     }
-                    var exchangeInfo = new ExchangeInfo(
-                        exchange.Name,
-                        exchange.Type,
-                        exchange.AutoDelete,
-                        exchange.Durable,
-                        exchange.Internal,
-                        exchange.Arguments);
-                    client.CreateExchange(exchangeInfo, vhost);
-                    Log.Info($"{exchange.GetTitle()} exchange is created.");
+                    catch (UnexpectedHttpStatusCodeException)
+                    {
+                        var exchangeInfo = new ExchangeInfo(
+                            exchange.Name,
+                            exchange.Type,
+                            exchange.AutoDelete,
+                            exchange.Durable,
+                            exchange.Internal,
+                            exchange.Arguments);
+                        client.CreateExchange(exchangeInfo, vhost);
+                        Log.Info($"{exchange.GetTitle()} exchange is created.");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Could not handle the {exchange.GetTitle()} exchange: {ex.Message}", ex);
                 }
+            }
         }
 
         private void RestoreQueues(IManagementClient client)
         {
             foreach (var queue in Queues.Where(x => !string.IsNullOrWhiteSpace(x.Name)))
+            {
                 try
                 {
                     var vhost = new Vhost { Name = queue.Vhost };
-                    var aliveQueue = client.GetQueue(queue.Name, vhost);
-                    if (aliveQueue != null)
+                    try
                     {
-                        Log.Debug($"{queue.GetTitle()} queue is alive.");
-                        continue;
+                        var aliveQueue = client.GetQueue(queue.Name, vhost);
+                        if (aliveQueue != null)
+                        {
+                            Log.Debug($"{queue.GetTitle()} queue is alive.");
+                        }
                     }
-                    var queueInfo = new QueueInfo(queue.Name, queue.AutoDelete, queue.Durable, new InputArguments());
-                    client.CreateQueue(queueInfo, vhost);
-                    Log.Info($"{queue.GetTitle()} queue is created.");
+                    catch (UnexpectedHttpStatusCodeException)
+                    {
+                        var queueInfo = new QueueInfo(queue.Name, queue.AutoDelete, queue.Durable, new InputArguments());
+                        client.CreateQueue(queueInfo, vhost);
+                        Log.Info($"{queue.GetTitle()} queue is created.");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Could not handle the {queue.GetTitle()} queue: {ex.Message}", ex);
                 }
+            }
         }
 
         private void RestoreBindings(IManagementClient client)
